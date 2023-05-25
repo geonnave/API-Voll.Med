@@ -92,7 +92,9 @@ export const schemaCriarPaciente = Yup.object().shape({
 
       const fileExtension = value.substring(value.lastIndexOf('.')).toLowerCase()
       return acceptedFormats.includes(fileExtension)
-    }) // Seria assim, mas como está recebendo uma string, não funciona
+    }) 
+    
+  // Seria assim, mas como está recebendo uma string, não funciona
   // .test('tamanho-imagem', 'Tamanho máximo de imagem excedido', function (value) {
   //   if (!value) return true // valores vazios
 

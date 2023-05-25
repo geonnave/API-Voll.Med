@@ -40,7 +40,7 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
     await AppDataSource.manager.save(Imagem, imagem)
 
     if (imagem.url === '') {
-      imagem.url = `${process.env.APP_URL}/tmp/uploads/${key}`
+      imagem.url = resolve(__dirname, ".." , ".." ,"tmp", "uploads", key)
     }
 
     paciente.imagem = imagem

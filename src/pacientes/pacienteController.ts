@@ -1,4 +1,5 @@
-import { type Request, type Response } from 'express'
+// import { type Request, type Response } from 'express'
+import { Request, Response } from 'express';
 import { Paciente } from './pacienteEntity.js'
 import { AppDataSource } from '../data-source.js'
 import { Endereco } from '../enderecos/enderecoEntity.js'
@@ -8,6 +9,33 @@ import { Consulta } from '../consultas/consultaEntity.js'
 import { AppError, Status } from '../error/ErrorHandler.js'
 import { encryptPassword } from '../utils/senhaUtils.js'
 import { schemaCriarPaciente } from './pacienteYupSchemas.js'
+import { sanitizacaoPaciente } from './pacienteSanitization.js'
+// import { getManager } from 'typeorm'
+// import { getConnection } from 'typeorm';
+// import { getRepository } from 'typeorm';
+
+export const consultaVulneravel = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { userInput } = req.query;
+  const query = `SELECT * FROM paciente WHERE nome = '${userInput}'`;
+  console.log(userInput)
+  console.log(query)
+  try {
+    // const pacienteRepository = getRepository(Paciente);
+    const listaPacientes = await AppDataSource.manager.query(query);
+    if (listaPacientes.length === 0) {
+      res.status(404).json('Paciente não encontrado!');
+    } else {
+      res.status(200).json(listaPacientes);
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+}
+
 
 export const criarPaciente = async (
   req: Request,
@@ -15,7 +43,9 @@ export const criarPaciente = async (
 ): Promise<void> => {
   try {
     const pacienteData = req.body
-    await schemaCriarPaciente.validate(pacienteData)
+    const pacienteSanitizado = sanitizacaoPaciente(pacienteData)
+    console.log(pacienteSanitizado)
+    await schemaCriarPaciente.validate(pacienteSanitizado)
     let {
       cpf,
       nome,
@@ -81,6 +111,7 @@ export const criarPaciente = async (
       res.status(400).json({ message: error.message })
     } else {
       res.status(502).json({ 'Paciente não foi criado': error })
+      console.log(error)
     }
   }
 }
