@@ -1,11 +1,12 @@
 import * as Yup from 'yup'
 import cep from 'cep-promise'
 import { cpf } from 'cpf-cnpj-validator'
+import { extname } from 'path'
 
 const nomesInvalidos = ['admin', 'root', 'senha', 'teste']
 const estadosValidos = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
-const acceptedFormats = ['.jpeg', '.jpg', '.png']
-// const maxSize = 10 * 1024 * 1024 // 10MB
+const acceptedFormats = ['.jpeg', '.jpg', '.png', '.svg']
+const maxSize = 10 * 1024 * 1024 // 10MB
 
 export const schemaCriarPaciente = Yup.object().shape({
   cpf: Yup.string()
@@ -85,20 +86,4 @@ export const schemaCriarPaciente = Yup.object().shape({
       .required()
       .max(50)
   }),
-
-  imagem: Yup.string()
-    .test('formato-imagem', 'Formato de imagem inválido', function (value) {
-      if (!value) return true // valores vazios
-
-      const fileExtension = value.substring(value.lastIndexOf('.')).toLowerCase()
-      return acceptedFormats.includes(fileExtension)
-    }) 
-    
-  // Seria assim, mas como está recebendo uma string, não funciona
-  // .test('tamanho-imagem', 'Tamanho máximo de imagem excedido', function (value) {
-  //   if (!value) return true // valores vazios
-
-  //   const fileSize = value.length;
-  //   return fileSize <= maxSize;
-  // })
 })
