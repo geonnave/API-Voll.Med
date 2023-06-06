@@ -4,7 +4,7 @@ import { Especialista } from './EspecialistaEntity.js'
 import { mapeiaPlano } from '../utils/planoSaudeUtils.js'
 import { Endereco } from '../enderecos/enderecoEntity.js'
 import { AppError } from '../error/ErrorHandler.js'
-import { encryptPassword } from '../utils/senhaUtils.js'
+import { hashPassword } from '../utils/senhaUtils.js'
 
 // Get All
 export const especialistas = async (
@@ -30,7 +30,7 @@ export const criarEspecialista = async (
     // transforma array de numbers em array de strings com os nomes dos planos definidos no enum correspondente
     planosSaude = mapeiaPlano(planosSaude)
   }
-  const senhaCriptografada = encryptPassword(senha)
+  const hashDaSenha = hashPassword(senha)
   const especialista = new Especialista(
     nome,
     crm,
@@ -38,7 +38,7 @@ export const criarEspecialista = async (
     estaAtivo,
     especialidade,
     email,
-    telefone, possuiPlanoSaude, planosSaude, senhaCriptografada
+    telefone, possuiPlanoSaude, planosSaude, hashDaSenha
   )
 
   const enderecoPaciente = new Endereco()
@@ -59,7 +59,8 @@ export const criarEspecialista = async (
 
   try {
     await AppDataSource.manager.save(Especialista, especialista)
-    res.status(200).json(especialista)
+    const { senha: _senha, ...especialistaSemSenha } = especialista;
+    res.json(especialistaSemSenha)
   } catch (error) {
     if ((await AppDataSource.manager.findOne(Especialista, { where: { crm } })) != null) {
       res.status(422).json({ message: 'Crm já cadastrado' })
