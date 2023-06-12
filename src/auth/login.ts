@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { Autenticaveis } from './authEntity.js'
 
 import { AppDataSource } from '../data-source.js'
-import { decryptPassword } from '../utils/senhaUtils.js'
+import { hashPassword } from '../utils/senhaUtils.js'
 import { AppError } from '../error/ErrorHandler.js'
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -18,9 +18,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     throw new AppError('Não encontrado!', 404)
   } else {
     const { id, rota, role, senha: senhaAuth } = autenticavel
-    const senhaCorrespondente = decryptPassword(senhaAuth)
+    const [ salt, hashDaSenha ] = senhaAuth.split(':')
 
-    if (senha !== senhaCorrespondente) {
+    if (hashPassword(senha, salt) !== senhaAuth) {
       throw new AppError('Senha incorreta!', 401)
     }
 

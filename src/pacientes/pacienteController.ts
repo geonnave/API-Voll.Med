@@ -6,7 +6,7 @@ import { CPFValido } from './validacaoCPF.js'
 import { mapeiaPlano } from '../utils/planoSaudeUtils.js'
 import { Consulta } from '../consultas/consultaEntity.js'
 import { AppError, Status } from '../error/ErrorHandler.js'
-import { encryptPassword } from '../utils/senhaUtils.js'
+import { hashPassword } from '../utils/senhaUtils.js'
 
 export const criarPaciente = async (
   req: Request,
@@ -36,12 +36,12 @@ export const criarPaciente = async (
   }
 
   try {
-    const senhaCriptografada = encryptPassword(senha)
+    const hashDaSenha = hashPassword(senha)
     const paciente = new Paciente(
       cpf,
       nome,
       email,
-      senhaCriptografada,
+      hashDaSenha,
       telefone,
       planosSaude,
       estaAtivo,
@@ -65,7 +65,8 @@ export const criarPaciente = async (
 
     await AppDataSource.manager.save(Paciente, paciente)
 
-    res.status(202).json(paciente)
+    const { senha: _senha, ...pacienteSemSenha } = paciente;
+    res.status(202).json(pacienteSemSenha)
   } catch (error) {
     res.status(502).json({ 'Paciente não foi criado': error })
   }
