@@ -8,13 +8,8 @@ import { mapeiaPlano } from '../utils/planoSaudeUtils.js'
 import { Consulta } from '../consultas/consultaEntity.js'
 import { AppError, Status } from '../error/ErrorHandler.js'
 import { encryptPassword } from '../utils/senhaUtils.js'
-import { schemaCriarPaciente } from './pacienteYupSchemas.js'
-import { sanitizacaoPaciente } from './pacienteSanitization.js'
-// import { getManager } from 'typeorm'
-// import { getConnection } from 'typeorm';
-// import { getRepository } from 'typeorm';
 
-export const consultaVulneravel = async (
+export const consultaPorPaciente = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -43,9 +38,6 @@ export const criarPaciente = async (
 ): Promise<void> => {
   try {
     const pacienteData = req.body
-    const pacienteSanitizado = sanitizacaoPaciente(pacienteData)
-    console.log(pacienteSanitizado)
-    await schemaCriarPaciente.validate(pacienteSanitizado)
     let {
       cpf,
       nome,
@@ -71,9 +63,11 @@ export const criarPaciente = async (
       res.status(409).json({ message: 'Já existe um paciente com esse CPF!' })
     }
 
-    if (possuiPlanoSaude === true && planosSaude !== undefined) {
+    let planosSaudeMapeados: string[] = []
+
+    if (possuiPlanoSaude === true && planosSaude !== undefined && Array.isArray(planosSaude)) {
       // transforma array de numbers em array de strings com os nomes dos planos definidos no enum correspondente
-      planosSaude = mapeiaPlano(planosSaude)
+      planosSaudeMapeados = mapeiaPlano(planosSaude);
     }
 
     const senhaCriptografada = encryptPassword(senha)
@@ -83,7 +77,7 @@ export const criarPaciente = async (
       email,
       senhaCriptografada,
       telefone,
-      planosSaude,
+      planosSaudeMapeados,
       estaAtivo,
       imagem,
       historico
@@ -105,7 +99,6 @@ export const criarPaciente = async (
 
     await AppDataSource.manager.save(Paciente, paciente)
 
-    res.status(202).json(paciente)
   } catch (error) {
     if (error.name === 'ValidationError') {
       res.status(400).json({ message: error.message })
