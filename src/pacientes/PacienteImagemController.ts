@@ -62,67 +62,18 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
     if (mimeType === 'image/svg+xml') {
       const svgContent = fs.readFileSync(req.file.path, 'utf-8')
       const firstLine = svgContent.split('\n')[0]
-      console.log(firstLine)
-      console.log(req.file.path)
-      console.log(svgContent)
 
       if (/\<script[\s\S]*?\>/s.test(svgContent)) {
         console.log("Cheguei aqui")
         return res.status(400).json({ error: 'Arquivo SVG contém scripts não permitidos' })
-        //throw new AppError('Arquivo SVG contém scripts não permitidos', Status.BAD_REQUEST);
+      }
+    } else if (mimeType === 'image/jpeg' || mimeType === 'image/png') {
+      // Verificação geral para JPEG e PNG
+      const imageContent = fs.readFileSync(req.file.path, 'utf-8')
+      if (/\<script[\s\S]*?\>/s.test(imageContent)) {
+        return res.status(400).json({ error: 'Arquivo contém scripts não permitidos' })
       }
     }
-    // else {
-    //   // Salvar o buffer como um arquivo temporário
-    //   const imagePath = resolve(__dirname, '..', '..', 'tmp', 'uploads', key);
-    //   await new Promise<void>((resolve, reject) => {
-    //     fs.writeFile(imagePath, req.file.buffer, (error) => {
-    //       if (error) {
-    //         reject(error);
-    //       } else {
-    //         resolve(undefined);
-    //       }
-    //     });
-    //   });
-    
-    //   // Ler a imagem usando Jimp
-    //   const image = await Jimp.read(req.file.buffer)
-    
-    //   // Verificar se a imagem foi carregada corretamente
-    //   if (!image) {
-    //     throw new AppError('Falha ao carregar a imagem', Status.BAD_REQUEST);
-    //   }
-    
-    //   // Verificar se a imagem contém elementos indesejados, como scripts
-    //   // Verificar se há texto ou camadas adicionais na imagem
-    //   if (image.bitmap && image.bitmap.width > 0 && image.bitmap.height > 0) {
-    //     throw new AppError('Imagem contém elementos não permitidos', Status.BAD_REQUEST);
-    //   }
-    
-    //   // Remover o arquivo temporário após o uso
-    //   fs.unlink(imagePath, (error) => {
-    //     if (error) {
-    //       console.error(`Erro ao remover arquivo temporário: ${imagePath}`, error);
-    //     }
-    //   });
-    // }
-
-    // function checkForScripts(node) {
-    //   if (node.tagName === 'script') {
-    //     return true;
-    //   }
-    
-    //   if (node.children) {
-    //     for (const child of node.children) {
-    //       if (checkForScripts(child)) {
-    //         return true;
-    //       }
-    //     }
-    //   }
-    
-    //   return false;
-    // }
-
 
     const imagem = new Imagem()
 
