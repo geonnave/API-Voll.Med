@@ -49,12 +49,10 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
 
     if (!mimeType || !acceptedMimeTypes.includes(mimeType)) {
       return res.status(400).json({ error: 'Formato de imagem inválido' })
-      // throw new AppError('Formato de imagem inválido', Status.BAD_REQUEST);
     }
 
     if (tamanho > maxSize) {
       return res.status(400).json({ error: 'Tamanho máximo de imagem excedido' })
-      // throw new AppError('Tamanho máximo de imagem excedido', Status.BAD_REQUEST);
     }
 
     console.log('Extensão do arquivo:', ext);

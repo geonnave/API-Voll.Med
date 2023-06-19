@@ -7,7 +7,7 @@ import multerConfig from '../config/multer.js'
 import { criaImagem, destroiImagem, listaImagemPaciente } from './PacienteImagemController.js'
 import {
   atualizarEnderecoPaciente,
-  consultaVulneravel,
+  consultaPorPaciente,
   atualizarPaciente,
   criarPaciente,
   desativaPaciente,
@@ -21,7 +21,7 @@ const upload = multer(multerConfig)
 export const pacienteRouter = Router()
 
 pacienteRouter.get('/', exibeTodosPacientes)
-pacienteRouter.get('/consulta-vulneravel', consultaVulneravel)
+pacienteRouter.get('/consulta-por-paciente', consultaPorPaciente)
 pacienteRouter.post('/', criarPaciente)
 pacienteRouter.get('/:id', lerPaciente)
 pacienteRouter.get('/:id/consultas', listaConsultasPaciente)
