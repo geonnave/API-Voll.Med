@@ -14,7 +14,7 @@ import { sanitizacaoPaciente } from './pacienteSanitization.js'
 // import { getConnection } from 'typeorm';
 // import { getRepository } from 'typeorm';
 
-export const consultaVulneravel = async (
+export const consultaPorPaciente = async (
   req: Request,
   res: Response
 ): Promise<void> => {
