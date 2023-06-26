@@ -10,6 +10,7 @@ import { AppError, Status } from '../error/ErrorHandler.js'
 import { encryptPassword } from '../utils/senhaUtils.js'
 import { schemaCriarPaciente } from './pacienteYupSchemas.js'
 import { sanitizacaoPaciente } from './pacienteSanitization.js'
+import { logger } from '../logger.js'
 // import { getManager } from 'typeorm'
 // import { getConnection } from 'typeorm';
 // import { getRepository } from 'typeorm';
@@ -20,19 +21,18 @@ export const consultaPorPaciente = async (
 ): Promise<void> => {
   const { userInput } = req.query;
   const query = `SELECT * FROM paciente WHERE nome = '${userInput}'`;
-  console.log(userInput)
-  console.log(query)
+  console.log("userInput: ", userInput)
+  console.log("query: ", query)
   try {
     // const pacienteRepository = getRepository(Paciente);
     const listaPacientes = await AppDataSource.manager.query(query);
     if (listaPacientes.length === 0) {
-      res.status(404).json('Paciente não encontrado!');
+      throw new AppError('Paciente não encontrado!', Status.NOT_FOUND);
     } else {
       res.status(200).json(listaPacientes);
     }
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ message: 'Erro interno do servidor' });
+    throw new AppError('Erro interno do servidor', Status.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -44,7 +44,7 @@ export const criarPaciente = async (
   try {
     const pacienteData = req.body
     const pacienteSanitizado = sanitizacaoPaciente(pacienteData)
-    console.log(pacienteSanitizado)
+    console.log("pacienteSanitizado: ", pacienteSanitizado)
     await schemaCriarPaciente.validate(pacienteSanitizado)
     let {
       cpf,
@@ -68,7 +68,7 @@ export const criarPaciente = async (
       where: { cpf }
     })
     if (existePacienteComCPF != null) {
-      res.status(409).json({ message: 'Já existe um paciente com esse CPF!' })
+      throw new AppError('Já existe um paciente com esse CPF!', Status.CONFLICT)
     }
 
     if (possuiPlanoSaude === true && planosSaude !== undefined) {
@@ -108,10 +108,9 @@ export const criarPaciente = async (
     res.status(202).json(paciente)
   } catch (error) {
     if (error.name === 'ValidationError') {
-      res.status(400).json({ message: error.message })
+      throw new AppError(error.message, Status.BAD_REQUEST)
     } else {
-      res.status(502).json({ 'Paciente não foi criado': error })
-      console.log(error)
+      throw new AppError('Paciente não foi criado!', Status.BAD_GATEWAY, error)
     }
   }
 }
@@ -122,6 +121,7 @@ export const exibeTodosPacientes = async (
 ): Promise<void> => {
   const tabelaPaciente = AppDataSource.getRepository(Paciente)
   const allPacientes = await tabelaPaciente.find({ relations: ['imagem'] })
+  logger.info({ leuQuantos: `${allPacientes.length}` }, "Chamou o método exibeTodosPacientes");
   if (allPacientes.length === 0) {
     res.status(200).json([])
   } else {
@@ -143,7 +143,7 @@ export const lerPaciente = async (
   })
 
   if (paciente === null) {
-    res.status(404).json('Paciente não encontrado!')
+    throw new AppError('Paciente não encontrado!, Status.NOT_FOUND')
   } else {
     res.status(200).json(paciente)
   }
@@ -213,7 +213,7 @@ export const atualizarPaciente = async (
     })
 
     if (paciente === null) {
-      res.status(404).json('Paciente não encontrado!')
+      throw new AppError('Paciente não encontrado', Status.NOT_FOUND)
     } else {
       paciente.cpf = cpf
       paciente.nome = nome
@@ -229,7 +229,7 @@ export const atualizarPaciente = async (
       res.status(200).json(paciente)
     }
   } catch (error) {
-    res.status(502).json('Paciente não foi atualizado!')
+    throw new AppError('Paciente não foi atualizado!', Status.BAD_GATEWAY)
   }
 }
 
@@ -245,7 +245,7 @@ export const atualizarEnderecoPaciente = async (
   })
 
   if (paciente === null) {
-    res.status(404).json('Paciente não encontrado!')
+    throw new AppError('Paciente não encontrado!, Status.NOT_FOUND')
   } else {
     if (paciente.endereco === null) {
       const endereco = new Endereco()
@@ -283,7 +283,7 @@ export const desativaPaciente = async (
   })
 
   if (paciente === null) {
-    res.status(404).json('Paciente não encontrado!')
+    throw new AppError('Paciente não encontrado!, Status.NOT_FOUND')
   } else {
     paciente.estaAtivo = false
     // await AppDataSource.manager.save(Paciente, paciente)

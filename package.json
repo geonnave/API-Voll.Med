@@ -39,6 +39,8 @@
       "moment": "^2.29.4",
       "multer": "^1.4.5-lts.1",
       "mysql2": "^3.3.0",
+      "pino": "^8.14.1",
+      "pino-pretty": "^10.0.0",
       "rbac": "^5.0.3",
       "redis": "^4.6.6",
       "reflect-metadata": "^0.1.13",
