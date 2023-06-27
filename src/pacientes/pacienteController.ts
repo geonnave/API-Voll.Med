@@ -229,7 +229,7 @@ export const atualizarPaciente = async (
       res.status(200).json(paciente)
     }
   } catch (error) {
-    throw new AppError('Paciente não foi atualizado!', Status.BAD_GATEWAY)
+    throw new AppError('Paciente não foi atualizado!', Status.BAD_GATEWAY, error)
   }
 }
 
