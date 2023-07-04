@@ -21,6 +21,7 @@ function verificaTokenJWT (...role: Role[]) {
     // Verifica se o token é válido
     jwt.verify(token, process.env.SECRET_JWT, function (err, decoded) {
       if (err) {
+        req.log.error({token: token, note: 'expired'}, 'Falha de autenticação: token expirou')
         throw new AppError('Falha ao autenticar o token. Token expirou', Status.FORBIDDEN, {token: token, note: 'expired'})
       }
 
