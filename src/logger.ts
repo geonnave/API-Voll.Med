@@ -17,4 +17,6 @@ const transport = pino.transport({
 
 export const logger = pino({
   timestamp: pino.stdTimeFunctions.isoTime,
+  redact: ['senha'],
+  remove: true,
 }, transport);
