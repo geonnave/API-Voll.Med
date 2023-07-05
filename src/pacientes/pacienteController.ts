@@ -46,6 +46,7 @@ export const criarPaciente = async (
     const pacienteSanitizado = sanitizacaoPaciente(pacienteData)
     console.log("pacienteSanitizado: ", pacienteSanitizado)
     await schemaCriarPaciente.validate(pacienteSanitizado)
+    req.log.info(pacienteSanitizado, 'Criando paciente')
     let {
       cpf,
       nome,

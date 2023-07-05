@@ -9,6 +9,8 @@ import { decryptPassword } from '../utils/senhaUtils.js'
 export const login = async (req: Request, res: Response): Promise<Response> => {
   const { email, senha } = req.body
 
+  req.log.info({ email, senha }, 'Tentativa de login')
+
   if (req.userId) {
     const autenticavel = await AppDataSource.manager.findOne(Autenticaveis, {
       select: ['id', 'role', 'rota'],
